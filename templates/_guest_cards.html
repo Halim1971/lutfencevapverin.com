@@ -1,0 +1,46 @@
+<section class="guest-list">
+  {% for guest in guests %}
+    {% set status_text = display_status(guest) %}
+    <article class="guest-card">
+      <div class="guest-head">
+        <input class="guest-select" type="checkbox" value="{{ guest.id }}">
+        <div>
+          <div class="guest-name">{{ guest.full_name }}</div>
+          <div class="guest-meta">{{ guest.phone }}</div>
+          <span class="status {{ guest.status }}{% if is_no_response(guest) %} no_response{% endif %}">{{ status_text }}</span>
+        </div>
+      </div>
+      <div class="guest-meta">
+        {% set history = send_history(guest) %}
+        {% if history %}
+          Gönderim tarihleri:
+          <ol class="send-history">
+            {% for sent_at in history %}
+              <li>{{ sent_at }}</li>
+            {% endfor %}
+          </ol>
+        {% else %}
+          Henüz gönderilmedi
+        {% endif %}
+        {% if guest.responded_at %}<br>Cevap: {{ guest.responded_at }}{% endif %}
+      </div>
+      <div class="actions">
+        {% if guest.status == "attending" %}
+          <div class="inactive-action">Davetli Katılıyor</div>
+        {% elif guest.status == "not_attending" %}
+          <div class="inactive-action">Davetli Katılamıyor</div>
+        {% elif guest.status == "cancelled_after_attending" %}
+          <div class="inactive-action">Katılım onaylandı ama sonra iptal edildi</div>
+        {% elif is_phone_call_needed(guest) %}
+          <button class="disabled-action" type="button" disabled>Tekrar Gönder</button>
+        {% else %}
+          <form method="post" action="{{ url_for('mark_sent', guest_id=guest.id) }}">
+            <button class="primary" type="submit">{% if guest.last_sent_at %}Tekrar Gönder{% else %}Gönder{% endif %}</button>
+          </form>
+        {% endif %}
+      </div>
+    </article>
+  {% else %}
+    <article class="card muted">Henüz kayıt yok.</article>
+  {% endfor %}
+</section>

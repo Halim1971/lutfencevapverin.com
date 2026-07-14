@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}lutfencevapverin.com{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=3">
+</head>
+<body>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-wrap">
+        {% for category, message in messages %}
+          <div class="flash {{ category }}" data-auto-dismiss>{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+  {% block body %}{% endblock %}
+  <script>
+  document.querySelectorAll('[data-auto-dismiss]').forEach((el) => {
+    setTimeout(() => {
+      el.classList.add('is-hiding');
+      setTimeout(() => el.remove(), 300);
+    }, 5000);
+  });
+  document.querySelectorAll('input[type="password"]').forEach((input) => {
+    if (input.closest('.password-wrap')) return;
+    const wrap = document.createElement('div');
+    wrap.className = 'password-wrap';
+    input.parentNode.insertBefore(wrap, input);
+    wrap.appendChild(input);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'password-toggle';
+    btn.setAttribute('aria-label', 'Şifreyi göster');
+    btn.textContent = '◉';
+    btn.addEventListener('click', () => {
+      const show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      btn.setAttribute('aria-label', show ? 'Şifreyi gizle' : 'Şifreyi göster');
+      btn.textContent = show ? '◎' : '◉';
+    });
+    wrap.appendChild(btn);
+  });
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+      window.location.reload();
+    }
+  });
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

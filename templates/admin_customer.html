@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% set back_url = back_url if back_url is defined else url_for('admin') %}
+{% block body %}
+<main class="app">
+  {% include "_topbar.html" with context %}
+  <section class="card stack">
+    <h1>{{ user.full_name or user.email }}</h1>
+    <p class="muted">{{ user.email }}</p>
+    <p><strong>Kullanıcı tipi:</strong> {{ 'Beta Kullanıcı' if user.is_beta_user else 'Normal Kullanıcı' }}</p>
+    {% if user.is_beta_user %}<p><strong>Kullanım:</strong> {{ 'Engelli' if user.is_access_blocked else 'Aktif' }}</p>{% endif %}
+  </section>
+  {% if not readonly|default(false) %}<section class="card stack">
+    <h2>Kullanıcı Erişim Yönetimi</h2>
+    <form method="post" action="{{ url_for('admin_customer_access', user_id=user.id) }}">
+      <input type="hidden" name="action" value="{{ 'beta_off' if user.is_beta_user else 'beta_on' }}">
+      <button class="primary" type="submit">{{ 'Beta Kullanıcıyı Kaldır' if user.is_beta_user else 'Beta Kullanıcı Yap' }}</button>
+    </form>
+    {% if user.is_beta_user %}
+      <form method="post" action="{{ url_for('admin_customer_access', user_id=user.id) }}">
+        <input type="hidden" name="action" value="{{ 'access_unblock' if user.is_access_blocked else 'access_block' }}">
+        <button class="{{ 'primary' if user.is_access_blocked else 'danger-button' }}" type="submit">{{ 'Kullanımı Tekrar Aktive Et' if user.is_access_blocked else 'Kullanımı Engelle' }}</button>
+      </form>
+    {% endif %}
+  </section>{% endif %}
+  <section class="summary">
+    <div><strong>{{ counts.total }}</strong><span>Davetli</span></div>
+    <div><strong>{{ counts.attending }}</strong><span>Katılan</span></div>
+    <div><strong>{{ counts.not_attending }}</strong><span>Katılamayan</span></div>
+    <div><strong>{{ counts.no_response }}</strong><span>Cevap Yok</span></div>
+  </section>
+  <section class="card stack">
+    <h2>Davetiye</h2>
+    {% if invitation and invitation.image_path %}
+      <img class="preview-img" src="{{ url_for('uploaded_file', filename=invitation.image_path) }}" alt="Davetiye">
+    {% else %}
+      <p class="muted">Davetiye yüklenmemiş.</p>
+    {% endif %}
+  </section>
+  <section class="card stack">
+    <h2>Davetliler</h2>
+    {% for guest in all_guests %}
+      <article class="guest-card">
+        <div class="guest-name">{{ guest.full_name }}</div>
+        <div class="guest-meta">{{ guest.phone }}</div>
+        <span class="status {{ guest.status }}{% if is_no_response(guest) %} no_response{% endif %}">{{ display_status(guest) }}</span>
+        {% if guest.last_sent_at %}<div class="guest-meta">Son gönderim: {{ guest.last_sent_at }}</div>{% endif %}
+        {% if guest.responded_at %}<div class="guest-meta">Cevap: {{ guest.responded_at }}</div>{% endif %}
+      </article>
+    {% else %}
+      <p class="muted">Davetli yok.</p>
+    {% endfor %}
+  </section>
+</main>
+{% endblock %}

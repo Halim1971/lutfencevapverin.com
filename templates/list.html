@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% set back_url = url_for('home') %}
+{% block body %}
+<main class="app">
+  {% include "_topbar.html" with context %}
+  <section class="card">
+    <h1>{{ title }}</h1>
+  </section>
+  {% if mode == "attending" %}
+    <section class="card stack">
+      <h2>Katılımcı Ekle</h2>
+      <form class="stack" method="post" action="{{ url_for('add_attending') }}">
+        <label>İsim Soyisim
+          <input name="full_name" required>
+        </label>
+        <label>Telefon
+          <input name="phone" inputmode="tel" required>
+        </label>
+        <button class="primary" type="submit">Katılımcı Ekle</button>
+      </form>
+    </section>
+    <form class="stack" method="post" action="{{ url_for('cancel_attending_selected') }}">
+      <button class="primary" type="submit">Seçili Olanları Listeden Çıkar</button>
+      <section class="guest-list">
+        {% for guest in guests %}
+          <article class="guest-card">
+            <div class="guest-head">
+              <input type="checkbox" name="guest_ids" value="{{ guest.id }}">
+              <div>
+                <div class="guest-name">{{ guest.full_name }}</div>
+                <div class="guest-meta">{{ guest.phone }}</div>
+                <span class="status {{ guest.status }}">{{ display_status(guest) }}</span>
+                {% if guest.responded_at %}<div class="guest-meta">Cevap zamanı: {{ guest.responded_at }}</div>{% endif %}
+              </div>
+            </div>
+          </article>
+        {% else %}
+          <article class="card muted">Bu listede kayıt yok.</article>
+        {% endfor %}
+      </section>
+    </form>
+  {% else %}
+  <section class="guest-list">
+    {% for guest in guests %}
+      <article class="guest-card">
+        <div>
+          <div class="guest-name">{{ guest.full_name }}</div>
+          <div class="guest-meta">{{ guest.phone }}</div>
+          <span class="status {{ guest.status }}{% if is_no_response(guest) %} no_response{% endif %}">{{ display_status(guest) }}</span>
+          {% set history = send_history(guest) %}
+          {% if history %}
+            <div class="guest-meta">
+              Gönderim tarihleri:
+              <ol class="send-history">
+                {% for sent_at in history %}
+                  <li>{{ sent_at }}</li>
+                {% endfor %}
+              </ol>
+            </div>
+          {% endif %}
+          {% if guest.responded_at %}<div class="guest-meta">Cevap zamanı: {{ guest.responded_at }}</div>{% endif %}
+        </div>
+        {% if mode == "no_response" %}
+          <form method="post" action="{{ url_for('mark_sent', guest_id=guest.id) }}">
+            <button class="secondary" type="submit">Tekrar Gönder</button>
+          </form>
+        {% elif mode == "not_attending" %}
+          <a class="secondary" href="{{ url_for('attendance_edit', guest_id=guest.id, next=url_for('not_attending')) }}">Katılım Düzenle</a>
+        {% elif mode == "phone_followup" %}
+          <a class="secondary call-button" href="tel:+{{ guest.phone }}" aria-label="Telefonla ara">📞</a>
+          <a class="secondary" href="https://wa.me/{{ guest.phone }}" target="_blank">WhatsApp</a>
+          <a class="secondary" href="{{ url_for('attendance_edit', guest_id=guest.id, next=url_for('phone_followups')) }}">Katılım Düzenle</a>
+        {% endif %}
+      </article>
+    {% else %}
+      <article class="card muted">Bu listede kayıt yok.</article>
+    {% endfor %}
+  </section>
+  {% endif %}
+</main>
+{% endblock %}

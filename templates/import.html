@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% set back_url = url_for('home') %}
+{% block body %}
+<main class="app">
+  {% include "_topbar.html" with context %}
+  <section class="card stack">
+    <h1>JSON Davetli İçeri Aktar</h1>
+    <p class="muted">Başka lutfencevapverin.com kullanıcısının dışarı aktarıp size gönderdiği JSON davetli dosyasını seçin. Aynı telefon numarası varsa tekrar eklenmez.</p>
+    <form class="stack" method="post" enctype="multipart/form-data">
+      <label>JSON Dosyası Seç
+        <input name="guest_file" type="file" accept=".json" required>
+      </label>
+      <button class="primary" type="submit">İçeri Aktar</button>
+    </form>
+  </section>
+</main>
+{% endblock %}

@@ -1,0 +1,15 @@
+<div class="topbar">
+  <a class="brand" href="{{ url_for('home') }}">
+    <img src="{{ url_for('static', filename='logo.jpg') }}" alt="">
+    <span>lutfencevapverin.com</span>
+  </a>
+  <div class="topbar-row">
+    {% if back_url %}
+      <a class="ghost" href="{{ back_url }}">Geri</a>
+    {% else %}
+      <form method="post" action="{{ url_for('logout') }}">
+        <button class="ghost" type="submit">Çıkış</button>
+      </form>
+    {% endif %}
+  </div>
+</div>

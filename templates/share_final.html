@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% set back_url = url_for('home') %}
+{% block body %}
+<main class="app">
+  {% include "_topbar.html" with context %}
+  <section class="card stack">
+    <h1>Son Durum Katılımcı Listesi Paylaş</h1>
+    <p class="muted">{{ count }} katılımcı dosya olarak paylaşılacak.</p>
+    <button class="primary" type="button" data-share-file="{{ url_for('share_final_excel') }}" data-filename="son_durum_katilimci_listesi.xlsx" data-mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+      WhatsApp ile Excel paylaş
+    </button>
+    <button class="secondary" type="button" data-share-file="{{ url_for('share_final_json') }}" data-filename="son_durum_katilimci_listesi.json" data-mime="application/json">
+      WhatsApp ile JSON paylaş
+    </button>
+    <p class="muted">Paylaşım ekranı açıldığında WhatsApp’ı seçip göndermek istediğiniz kişiyi belirleyin.</p>
+  </section>
+</main>
+{% endblock %}
+{% block scripts %}
+<script>
+async function shareFile(button) {
+  const url = button.dataset.shareFile;
+  const filename = button.dataset.filename;
+  const mime = button.dataset.mime;
+  const response = await fetch(url, { cache: 'no-store' });
+  const blob = await response.blob();
+  const file = new File([blob], filename, { type: mime });
+  if (navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+    await navigator.share({
+      title: 'Son Durum Katılımcı Listesi',
+      text: 'Son durum katılımcı listesi ekte.',
+      files: [file]
+    });
+    return;
+  }
+  alert('Bu tarayıcı dosya paylaşımını desteklemiyor. Lütfen mobil Chrome veya telefonun paylaşım menüsünü destekleyen bir tarayıcı kullanın.');
+}
+
+document.querySelectorAll('[data-share-file]').forEach((button) => {
+  button.addEventListener('click', async () => {
+    try {
+      await shareFile(button);
+    } catch (error) {
+      alert('Dosya paylaşımı açılamadı. Lütfen tekrar deneyin.');
+    }
+  });
+});
+</script>
+{% endblock %}

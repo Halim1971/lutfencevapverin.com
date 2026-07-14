@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% set back_url = url_for('home') %}
+{% block body %}
+<main class="app">
+  {% include "_topbar.html" with context %}
+  <section class="card stack">
+    <h1>JSON Dışarı Aktar</h1>
+    <p class="muted">Bu işlem davetli listenizi başka bir lutfencevapverin.com kullanıcısına gönderebilmeniz için JSON dosyası oluşturur.</p>
+    <p><strong>{{ guests|length }}</strong> davetli dışarı aktarılacak.</p>
+    <form class="stack" method="post" action="{{ url_for('export_download') }}">
+      <button class="primary" type="submit">JSON dışarı aktarmayı onaylıyorum</button>
+    </form>
+    <a class="ghost" href="{{ url_for('home') }}">Vazgeç</a>
+  </section>
+</main>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% set back_url = none %}
+{% block body %}
+<main class="app">
+  {% include "_topbar.html" with context %}
+  <section class="card">
+    <h1>Süper Admin</h1>
+    <p class="muted">Organizatör ve kullanıcı yönetimi</p>
+  </section>
+
+  <section class="mini-row">
+    <details class="card stack">
+      <summary class="primary">Organizatör Oluştur</summary>
+      <form class="stack" method="post" action="{{ url_for('admin_create_account') }}">
+        <input type="hidden" name="role" value="organizer">
+        <label>Email adresi
+          <input name="email" type="email" autocomplete="off" required>
+        </label>
+        <button class="primary" type="submit">4 Rakamlı Şifre Oluştur</button>
+      </form>
+    </details>
+    <details class="card stack">
+      <summary class="primary">Normal Kullanıcı Oluştur</summary>
+      <form class="stack" method="post" action="{{ url_for('admin_create_account') }}">
+        <input type="hidden" name="role" value="couple">
+        <label>Email adresi
+          <input name="email" type="email" autocomplete="off" required>
+        </label>
+        <button class="primary" type="submit">4 Rakamlı Şifre Oluştur</button>
+      </form>
+    </details>
+  </section>
+
+  <nav class="mini-row">
+    <a class="{{ 'primary' if active_filter == 'organizers' else 'secondary' }}" href="{{ url_for('admin', type='organizers') }}">Organizatörler</a>
+    <a class="{{ 'primary' if active_filter == 'users' else 'secondary' }}" href="{{ url_for('admin', type='users') }}">Normal Kullanıcılar</a>
+  </nav>
+
+  <section class="guest-list">
+    {% for item in users %}
+      <article class="guest-card">
+        <div class="guest-name">{{ item.user.email }}</div>
+        {% if item.user.login_password %}
+          <div class="credential-box">
+            <span>Email</span><code>{{ item.user.email }}</code>
+            <span>Şifre</span><code>{{ item.user.login_password }}</code>
+          </div>
+        {% endif %}
+        <div class="guest-meta">{{ 'Organizatör' if item.user.role == 'organizer' else 'Normal Kullanıcı' }} — {{ 'Kullanımı Engelli' if item.user.is_access_blocked else 'Aktif' }}</div>
+        <form method="post" action="{{ url_for('admin_customer_access', user_id=item.user.id) }}">
+          <input type="hidden" name="action" value="{{ 'access_unblock' if item.user.is_access_blocked else 'access_block' }}">
+          <button class="{{ 'primary' if item.user.is_access_blocked else 'danger-button' }}" type="submit">{{ 'Kullanımı Aç' if item.user.is_access_blocked else 'Kullanımı Engelle' }}</button>
+        </form>
+        {% if item.user.role == 'organizer' %}
+          <a class="secondary" href="{{ url_for('admin_organizer', user_id=item.user.id) }}">Organizatöre Git</a>
+        {% else %}
+          <div class="summary">
+            <div><strong>{{ item.counts.total }}</strong><span>Davetli</span></div>
+            <div><strong>{{ item.counts.attending }}</strong><span>Katılan</span></div>
+            <div><strong>{{ item.counts.not_attending }}</strong><span>Katılamayan</span></div>
+            <div><strong>{{ item.counts.no_response }}</strong><span>Cevap Yok</span></div>
+          </div>
+          <a class="secondary" href="{{ url_for('user_readonly', user_id=item.user.id) }}">Kullanıcı Sayfasını Göster</a>
+        {% endif %}
+      </article>
+    {% else %}
+      <article class="card muted">Henüz kayıt yok.</article>
+    {% endfor %}
+  </section>
+</main>
+{% endblock %}

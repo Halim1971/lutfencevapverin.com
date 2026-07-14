@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% set back_url = url_for('admin', type='organizers') if super_view else none %}
+{% block body %}
+<main class="app">
+  {% include "_topbar.html" with context %}
+  <section class="card">
+    <h1>Admin</h1>
+    <p class="muted">{{ organizer.email }}</p>
+  </section>
+
+  {% if not super_view %}
+    <details class="card stack">
+      <summary class="primary">Kullanıcı Oluştur</summary>
+      <form class="stack" method="post" action="{{ url_for('organizer_create_user') }}">
+        <label>Kullanıcı email adresini girin
+          <input name="email" type="email" autocomplete="off" required>
+        </label>
+        <button class="primary" type="submit">Kullanıcı Oluştur</button>
+      </form>
+    </details>
+  {% endif %}
+
+  <section class="card">
+    <h2>Kullanıcı Listesi</h2>
+  </section>
+  <section class="guest-list">
+    {% for item in users %}
+      <article class="guest-card">
+        <div class="guest-name">{{ item.user.email }}</div>
+        <div class="credential-box">
+          <span>Email</span><code>{{ item.user.email }}</code>
+          <span>Şifre</span><code>{{ item.user.login_password or 'Eski kayıt' }}</code>
+        </div>
+        <div class="summary">
+          <div><strong>{{ item.counts.total }}</strong><span>Davetli</span></div>
+          <div><strong>{{ item.counts.attending }}</strong><span>Katılan</span></div>
+          <div><strong>{{ item.counts.not_attending }}</strong><span>Katılamayan</span></div>
+          <div><strong>{{ item.counts.no_response }}</strong><span>Cevap Yok</span></div>
+        </div>
+        <a class="secondary" href="{{ url_for('user_readonly', user_id=item.user.id) }}">Kullanıcı Sayfasını Göster</a>
+      </article>
+    {% else %}
+      <article class="card muted">Henüz kullanıcı yok.</article>
+    {% endfor %}
+  </section>
+</main>
+{% endblock %}

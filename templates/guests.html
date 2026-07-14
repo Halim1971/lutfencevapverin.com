@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% set back_url = url_for('home') %}
+{% block body %}
+<main class="app">
+  {% include "_topbar.html" with context %}
+  <section class="card stack">
+    <h1>{{ title }}</h1>
+    <p class="muted">Davetli ekleyin, çıkarın, WhatsApp ile kişisel LCV linki gönderin.</p>
+    {% if show_add %}
+      <form class="stack" method="post">
+        <label>İsim Soyisim
+          <input name="full_name" autocomplete="name" required>
+        </label>
+        <label>Telefon
+          <input name="phone" inputmode="tel" placeholder="05xx..." required>
+        </label>
+        <button class="primary" type="submit">Davetli Ekle</button>
+      </form>
+      <div class="stack">
+        <form class="stack" method="post" action="{{ url_for('excel_import') }}" enctype="multipart/form-data">
+          <label>Dosya Seç
+            <input name="excel_file" type="file" accept=".xlsx" required>
+          </label>
+          <button class="secondary" type="submit">Excel Yükle</button>
+        </form>
+        <button class="secondary" type="button" onclick="alert('Web test aşamasında telefon rehberi simüle edilmektedir. Manuel kişi ekleyebilirsiniz.')">Telefondan Kişi Ekle</button>
+      </div>
+    {% endif %}
+  </section>
+  <section class="stack">
+    <form method="post" action="{{ url_for('bulk_send') }}" data-bulk-form>
+      <button class="primary" type="submit">Seçili Olanlara Davetiye Gönder</button>
+    </form>
+    <form method="post" action="{{ url_for('bulk_delete') }}" data-bulk-form onsubmit="return confirm('Seçili davetliler listeden çıkarılsın mı?')">
+      <button class="primary" type="submit">Seçili Olanları Listeden Çıkar</button>
+    </form>
+    {% include "_guest_cards.html" %}
+  </section>
+</main>
+{% endblock %}
+{% block scripts %}
+<script>
+document.querySelectorAll('[data-bulk-form]').forEach((form) => {
+  form.addEventListener('submit', (event) => {
+    form.querySelectorAll('input[name="guest_ids"]').forEach((input) => input.remove());
+    const checked = [...document.querySelectorAll('.guest-select:checked')];
+    if (!checked.length) {
+      event.preventDefault();
+      alert('Lütfen en az bir davetli seçin.');
+      return;
+    }
+    checked.forEach((checkbox) => {
+      const hidden = document.createElement('input');
+      hidden.type = 'hidden';
+      hidden.name = 'guest_ids';
+      hidden.value = checkbox.value;
+      form.appendChild(hidden);
+    });
+  });
+});
+</script>
+{% endblock %}

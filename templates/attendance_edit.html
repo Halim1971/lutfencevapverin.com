@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% set back_url = next_url %}
+{% block body %}
+<main class="app">
+  {% include "_topbar.html" with context %}
+  <section class="card stack">
+    <h1>Katılım Düzenle</h1>
+    <p class="muted">Davetli katılımını manuel onaylıyor musunuz?</p>
+    <div>
+      <div class="guest-name">{{ guest.full_name }}</div>
+      <div class="guest-meta">{{ guest.phone }}</div>
+      <span class="status {{ guest.status }}{% if is_phone_call_needed(guest) %} no_response{% endif %}">{{ display_status(guest) }}</span>
+    </div>
+    <form method="post" action="{{ url_for('manual_attending', guest_id=guest.id) }}">
+      <input type="hidden" name="next" value="{{ next_url }}">
+      <button class="primary" type="submit">Davetli katılımını manuel onayla</button>
+    </form>
+  </section>
+</main>
+{% endblock %}

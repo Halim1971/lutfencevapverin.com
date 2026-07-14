@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block body %}
+<main class="public">
+  <section class="card stack">
+    <div class="brand auth-brand">
+      <img src="{{ url_for('static', filename='logo.jpg') }}" alt="">
+      <span>lutfencevapverin.com</span>
+    </div>
+    <div class="auth-title">
+      <strong>LCV</strong>
+      <span>Yönetimi</span>
+    </div>
+    <h1>Giriş / Kaydol</h1>
+    <form class="stack" method="post">
+      <label>Email
+        <input name="email" type="email" required>
+      </label>
+      <label>Şifre
+        <input name="password" type="password" minlength="6" required>
+      </label>
+      <button class="primary" type="submit">Oluştur</button>
+    </form>
+    <a class="ghost" href="{{ url_for('login') }}">Girişe Dön</a>
+  </section>
+</main>
+{% endblock %}

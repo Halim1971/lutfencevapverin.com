@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block body %}
+<main class="app">
+  {% include "_topbar.html" with context %}
+  <section class="card">
+    <h1>LCV Yönetimi</h1>
+    <p class="muted">{{ user.full_name or user.email }} — Salt okunur görünüm</p>
+  </section>
+
+  <section class="summary">
+    <a class="summary-item" href="#davetliler"><strong>{{ counts.total }}</strong><span>Davetli</span></a>
+    <a class="summary-item" href="#katilanlar"><strong>{{ counts.attending }}</strong><span>Katılımcı</span></a>
+    <a class="summary-item" href="#katilamayanlar"><strong>{{ counts.not_attending }}</strong><span>Katılamayan</span></a>
+    <a class="summary-item" href="#cevap-yok"><strong>{{ counts.no_response }}</strong><span>Cevap Vermeyen</span></a>
+    <a class="summary-item" href="#telefon"><strong>{{ counts.phone_followup }}</strong><span>Telefonla Aranacak</span></a>
+  </section>
+
+  <nav class="grid-menu">
+    <a class="big-button" href="#davetiye">Davetiye</a>
+    <a class="big-button" href="#davetliler">Davetli Ekle / Çıkar</a>
+    <a class="big-button" href="#katilanlar">Katılımcılar</a>
+    <a class="big-button" href="#katilamayanlar">Katılamayanlar</a>
+    <a class="big-button" href="#cevap-yok">Cevap Vermeyenler</a>
+    <a class="big-button" href="#telefon">Telefonla Aranması Gerekenler</a>
+    <a class="big-button" href="#json-aktarim">JSON İçeri Aktar</a>
+    <a class="big-button" href="#json-aktarim">JSON Dışarı Aktar</a>
+    <a class="big-button" href="#son-durum">Son Durum Katılımcı Listesi Paylaş</a>
+    <a class="big-button" href="#ayarlar">Ayarlar</a>
+  </nav>
+
+  <section class="card stack" id="davetiye">
+    <h2>Davetiye</h2>
+    {% if invitation and invitation.image_path %}
+      <img class="preview-img" src="{{ url_for('uploaded_file', filename=invitation.image_path) }}" alt="Davetiye">
+    {% else %}<p class="muted">Davetiye yüklenmemiş.</p>{% endif %}
+    <h3>Davetiye mesajı</h3>
+    <p class="readonly-text">{{ invitation_message or 'Davetiye mesajı girilmemiş.' }}</p>
+  </section>
+
+  {% macro guest_section(section_id, title, rows) %}
+    <section class="card stack" id="{{ section_id }}">
+      <h2>{{ title }} ({{ rows|length }})</h2>
+      {% for guest in rows %}
+        <article class="guest-card">
+          <div class="guest-name">{{ guest.full_name }}</div>
+          <div class="guest-meta">{{ guest.phone }}</div>
+          <span class="status {{ guest.status }}{% if is_no_response(guest) %} no_response{% endif %}">{{ display_status(guest) }}</span>
+          {% if guest.last_sent_at %}<div class="guest-meta">Son gönderim: {{ guest.last_sent_at }}</div>{% endif %}
+          {% if guest.responded_at %}<div class="guest-meta">Cevap: {{ guest.responded_at }}</div>{% endif %}
+        </article>
+      {% else %}<p class="muted">Kayıt yok.</p>{% endfor %}
+    </section>
+  {% endmacro %}
+
+  {{ guest_section('davetliler', 'Davetliler', all_guests) }}
+  {{ guest_section('katilanlar', 'Katılımcılar', attending) }}
+  {{ guest_section('katilamayanlar', 'Katılamayanlar', not_attending) }}
+  {{ guest_section('cevap-yok', 'Cevap Vermeyenler', no_response) }}
+  {{ guest_section('telefon', 'Telefonla Aranması Gerekenler', phone_followups) }}
+
+  <section class="card stack" id="json-aktarim">
+    <h2>JSON Aktarım</h2>
+    <p class="muted">JSON içeri ve dışarı aktarım alanları salt okunur görünümde değişiklik yapılmaması için kapalıdır.</p>
+  </section>
+
+  {{ guest_section('son-durum', 'Son Durum Katılımcı Listesi', final_participants) }}
+
+  <section class="card stack" id="ayarlar">
+    <h2>Ayarlar</h2>
+    <p><strong>Cevap vermeyen sayılma süresi:</strong> {{ no_response_after_hours }} saat</p>
+    <p><strong>Davetiye mesajı:</strong></p>
+    <p class="readonly-text">{{ invitation_message or 'Davetiye mesajı girilmemiş.' }}</p>
+  </section>
+</main>
+{% endblock %}

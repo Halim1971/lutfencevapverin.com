@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block body %}
+<main class="public">
+  <section class="card stack">
+    <div class="brand auth-brand">
+      <img src="{{ url_for('static', filename='logo.jpg') }}" alt="">
+      <span>lutfencevapverin.com</span>
+    </div>
+    <div class="auth-title">
+      <strong>LCV</strong>
+      <span>Yönetimi</span>
+    </div>
+    <div>
+      <h1>Giriş / Kaydol</h1>
+      <p class="muted">LCV takibini telefonunuzdan yönetin.</p>
+    </div>
+    <form class="stack" method="post">
+      <label>Email
+        <input name="email" type="email" autocomplete="email" required>
+      </label>
+      <label>Şifre
+        <input name="password" type="password" autocomplete="current-password" required>
+      </label>
+      <button class="primary" type="submit">Giriş Yap</button>
+    </form>
+  </section>
+</main>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block body %}
+<main class="app">
+  {% include "_topbar.html" with context %}
+  <section class="card">
+    <h1>LCV Yönetimi</h1>
+    <p class="muted">Kim geliyor, kim gelemiyor, kim cevap vermedi. Tek ekrandan takip edin.</p>
+  </section>
+  <section class="summary">
+    <a class="summary-item{% if counts.total == 0 %} inactive{% endif %}" href="{% if counts.total > 0 %}{{ url_for('guests') }}{% else %}#{% endif %}">
+      <strong>{{ counts.total }}</strong><span>Davetli</span>
+    </a>
+    <a class="summary-item{% if counts.attending == 0 %} inactive{% endif %}" href="{% if counts.attending > 0 %}{{ url_for('attending') }}{% else %}#{% endif %}">
+      <strong>{{ counts.attending }}</strong><span>Katılımcı</span>
+    </a>
+    <a class="summary-item{% if counts.not_attending == 0 %} inactive{% endif %}" href="{% if counts.not_attending > 0 %}{{ url_for('not_attending') }}{% else %}#{% endif %}">
+      <strong>{{ counts.not_attending }}</strong><span>Katılamayan</span>
+    </a>
+    <div class="summary-with-note">
+      <a class="summary-item{% if counts.no_response == 0 %} inactive{% endif %}" href="{% if counts.no_response > 0 %}{{ url_for('no_response') }}{% else %}#{% endif %}">
+        <strong>{{ counts.no_response }}</strong><span>Cevap Vermeyen</span>
+      </a>
+      <p class="summary-note">(Ayarlar kısmında belirtilen süre zarfında)</p>
+    </div>
+    <a class="summary-item{% if counts.phone_followup == 0 %} inactive{% endif %}" href="{% if counts.phone_followup > 0 %}{{ url_for('phone_followups') }}{% else %}#{% endif %}">
+      <strong>{{ counts.phone_followup }}</strong><span>Telefonla Aranacak</span>
+    </a>
+  </section>
+  <nav class="grid-menu">
+    <a class="big-button" href="{{ url_for('invitation') }}">Davetiye</a>
+    <a class="big-button" href="{{ url_for('guests') }}">Davetli Ekle / Çıkar</a>
+    <a class="big-button" href="{{ url_for('attending') }}">Katılımcılar</a>
+    <a class="big-button" href="{{ url_for('not_attending') }}">Katılamayanlar</a>
+    <a class="big-button" href="{{ url_for('no_response') }}">Cevap Vermeyenler</a>
+    <a class="big-button" href="{{ url_for('phone_followups') }}">Telefonla Aranması Gerekenler</a>
+    <a class="big-button" href="{{ url_for('import_guests') }}">JSON İçeri Aktar</a>
+    <a class="big-button" href="{{ url_for('export_guests') }}">JSON Dışarı Aktar</a>
+    <a class="big-button" href="{{ url_for('share_final') }}">Son Durum Katılımcı Listesi Paylaş</a>
+    <a class="big-button" href="{{ url_for('settings') }}">Ayarlar</a>
+  </nav>
+</main>
+{% endblock %}

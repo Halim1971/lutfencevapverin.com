@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% set back_url = url_for('guests') %}
+{% block body %}
+<main class="app">
+  {% include "_topbar.html" with context %}
+  <section class="card stack">
+    <h1>Toplu Gönderim Testi</h1>
+    <p class="muted">WhatsApp kuralları nedeniyle mesajlar otomatik gönderilmez. Her davetli için WhatsApp açılır, gönder tuşuna siz basarsınız.</p>
+    <button class="primary" id="openLinks" type="button">Sırayla WhatsApp Aç</button>
+    {% for guest in guests %}
+      <a class="secondary" href="{{ links[loop.index0] }}" target="_blank">{{ guest.full_name }} için aç</a>
+    {% endfor %}
+  </section>
+</main>
+{% endblock %}
+{% block scripts %}
+<script>
+const links = {{ links|tojson }};
+document.getElementById('openLinks').addEventListener('click', () => {
+  links.forEach((link, index) => {
+    setTimeout(() => window.open(link, '_blank'), index * 1200);
+  });
+});
+</script>
+{% endblock %}

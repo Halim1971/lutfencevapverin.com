@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% set back_url = url_for('home') %}
+{% block body %}
+<main class="app">
+  {% include "_topbar.html" with context %}
+  <section class="card stack">
+    <h1>Ayarlar</h1>
+    <form class="stack" method="post">
+      <label>Kaç saat sonra cevap gelmezse Cevap Vermeyenler kısmına düşsün?
+        <input name="hours" type="number" min="1" step="1" value="{{ hours }}" required>
+      </label>
+      <button class="primary" type="submit">Kaydet</button>
+    </form>
+  </section>
+</main>
+{% endblock %}

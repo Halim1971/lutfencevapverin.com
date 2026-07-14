@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% set back_url = url_for('home') %}
+{% block body %}
+<main class="app">
+  {% include "_topbar.html" with context %}
+  <section class="card stack">
+    <h1>Davetiye</h1>
+    <p class="muted">Tek bir davetiye görseli yükleyin. Davetli kişisel linki açınca bu görseli görecek.</p>
+    {% if invitation_url %}
+      <img class="preview-img" src="{{ invitation_url }}" alt="Davetiye">
+    {% else %}
+      <div class="card muted">Henüz davetiye yüklenmedi.</div>
+    {% endif %}
+    <form class="stack" method="post" enctype="multipart/form-data">
+      <label class="file-box">Davetiye Görseli
+        <input name="invitation" type="file" accept=".png,.jpg,.jpeg,.webp" required>
+      </label>
+      <button class="primary" type="submit">Davetiye Yükle</button>
+    </form>
+    <details class="stack">
+      <summary class="primary">Davetiye Mesajı Belirleme</summary>
+      <form class="stack" method="post">
+        <label>WhatsApp davetiye mesajı
+          <textarea name="invitation_message" rows="6" required>{{ invitation_message }}</textarea>
+        </label>
+        <p class="muted">Mesaj içinde kişisel cevap linkinin geleceği yere <code>{link}</code> yazabilirsiniz. Yazmazsanız link mesajın sonuna otomatik eklenir.</p>
+        <button class="primary" type="submit">Mesajı Kaydet</button>
+      </form>
+    </details>
+  </section>
+</main>
+{% endblock %}
