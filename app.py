@@ -29,7 +29,7 @@ from werkzeug.utils import secure_filename
 
 BASE_DIR = Path(__file__).resolve().parent
 INSTANCE_DIR = BASE_DIR / "instance"
-UPLOAD_DIR = BASE_DIR / "uploads"
+UPLOAD_DIR = Path(os.environ.get("UPLOAD_PATH", BASE_DIR / "uploads"))
 DB_PATH = Path(os.environ.get("DATABASE_PATH", INSTANCE_DIR / "lcv.sqlite3"))
 ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp"}
 ALLOWED_IMPORT_EXTENSIONS = {".json"}
