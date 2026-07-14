@@ -355,6 +355,22 @@ def api_admin_required(fn):
     return wrapper
 
 
+def api_manager_required(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        user = api_current_user()
+        if not user:
+            return jsonify({"error": "unauthorized"}), 401
+        if user["role"] not in ("super_admin", "organizer"):
+            return jsonify({"error": "Bu işlem için yetkiniz yok."}), 403
+        if not can_use_app(user):
+            return jsonify({"error": "Kullanıcı erişiminiz durdurulmuştur."}), 403
+        g.api_user = user
+        return fn(*args, **kwargs)
+
+    return wrapper
+
+
 def login_required(role=None):
     def decorator(fn):
         def wrapper(*args, **kwargs):
@@ -946,6 +962,105 @@ def api_final_participants():
         for row in rows
     ]
     return jsonify({"participants": participants, "count": len(participants)})
+
+
+def management_account_payload(user):
+    return {
+        "user": user_payload(user),
+        "login_password": user["login_password"],
+        "managed_by_user_id": user["managed_by_user_id"],
+        "counts": guest_counts(user["id"]) if user["role"] == "couple" else None,
+    }
+
+
+@app.route("/api/management/accounts", methods=["GET", "POST"])
+@api_manager_required
+def api_management_accounts():
+    viewer = g.api_user
+    if request.method == "POST":
+        data = request.get_json(silent=True) or {}
+        role = str(data.get("role", "couple"))
+        if viewer["role"] == "organizer":
+            role = "couple"
+            manager_id = viewer["id"]
+        else:
+            if role not in ("organizer", "couple"):
+                return jsonify({"error": "Geçersiz kullanıcı türü."}), 400
+            manager_id = None
+        try:
+            user_id, password = create_managed_account(data.get("email"), role, manager_id)
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
+        except LookupError as exc:
+            return jsonify({"error": str(exc)}), 409
+        user = get_db().execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+        return jsonify({
+            "account": management_account_payload(user),
+            "temporary_password": password,
+        }), 201
+
+    requested_role = request.args.get("role", "couple")
+    managed_by = request.args.get("managed_by")
+    if viewer["role"] == "organizer":
+        rows = get_db().execute(
+            "SELECT * FROM users WHERE role = 'couple' AND managed_by_user_id = ? ORDER BY created_at DESC, id DESC",
+            (viewer["id"],),
+        ).fetchall()
+    elif requested_role == "organizer":
+        rows = get_db().execute(
+            "SELECT * FROM users WHERE role = 'organizer' ORDER BY created_at DESC, id DESC"
+        ).fetchall()
+    elif managed_by and str(managed_by).isdigit():
+        rows = get_db().execute(
+            "SELECT * FROM users WHERE role = 'couple' AND managed_by_user_id = ? ORDER BY created_at DESC, id DESC",
+            (int(managed_by),),
+        ).fetchall()
+    else:
+        rows = get_db().execute(
+            "SELECT * FROM users WHERE role = 'couple' ORDER BY created_at DESC, id DESC"
+        ).fetchall()
+    return jsonify({"accounts": [management_account_payload(user) for user in rows]})
+
+
+@app.route("/api/management/accounts/<int:user_id>/access", methods=["POST"])
+@api_admin_required
+def api_management_account_access(user_id):
+    user = get_db().execute(
+        "SELECT * FROM users WHERE id = ? AND role IN ('couple', 'organizer')", (user_id,)
+    ).fetchone()
+    if not user:
+        return jsonify({"error": "Kullanıcı bulunamadı."}), 404
+    blocked = bool((request.get_json(silent=True) or {}).get("blocked"))
+    get_db().execute("UPDATE users SET is_access_blocked = ? WHERE id = ?", (int(blocked), user_id))
+    get_db().commit()
+    return jsonify({"message": "Kullanım engellendi." if blocked else "Kullanım açıldı."})
+
+
+@app.route("/api/management/users/<int:user_id>/readonly")
+@api_manager_required
+def api_management_user_readonly(user_id):
+    viewer = g.api_user
+    user = get_db().execute(
+        "SELECT * FROM users WHERE id = ? AND role = 'couple'", (user_id,)
+    ).fetchone()
+    allowed = user and (
+        viewer["role"] == "super_admin"
+        or user["managed_by_user_id"] == viewer["id"]
+    )
+    if not allowed:
+        return jsonify({"error": "Bu kullanıcıyı görüntüleme yetkiniz yok."}), 403
+    invitation = invitation_for(user_id)
+    return jsonify({
+        "user": user_payload(user),
+        "counts": guest_counts(user_id),
+        "guests": [api_guest_payload(guest) for guest in load_guests(user_id)],
+        "invitation": {
+            "image_url": invitation_url(invitation),
+            "message": get_invitation_message(user_id),
+        },
+        "no_response_after_hours": get_setting(user_id),
+        "final_participants": [api_guest_payload(guest) for guest in final_participant_rows(user_id)],
+    })
 
 
 @app.route("/api/admin/users")
