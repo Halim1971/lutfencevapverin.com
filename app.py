@@ -1036,6 +1036,44 @@ def api_management_account_access(user_id):
     return jsonify({"message": "Kullanım engellendi." if blocked else "Kullanım açıldı."})
 
 
+@app.route("/api/management/accounts/<int:user_id>", methods=["DELETE"])
+@api_admin_required
+def api_management_account_delete(user_id):
+    if user_id == g.api_user["id"]:
+        return jsonify({"error": "Kendi Süper Admin hesabınızı silemezsiniz."}), 400
+    db = get_db()
+    user = db.execute(
+        "SELECT * FROM users WHERE id = ? AND role IN ('couple', 'organizer')", (user_id,)
+    ).fetchone()
+    if not user:
+        return jsonify({"error": "Kullanıcı bulunamadı."}), 404
+
+    invitation_path = None
+    if user["role"] == "couple":
+        invitation = db.execute(
+            "SELECT image_path FROM invitations WHERE user_id = ?", (user_id,)
+        ).fetchone()
+        invitation_path = invitation["image_path"] if invitation else None
+        db.execute("DELETE FROM guest_send_logs WHERE user_id = ?", (user_id,))
+        db.execute("DELETE FROM guests WHERE user_id = ?", (user_id,))
+        db.execute("DELETE FROM invitations WHERE user_id = ?", (user_id,))
+        db.execute("DELETE FROM settings WHERE user_id = ?", (user_id,))
+    else:
+        db.execute(
+            "UPDATE users SET managed_by_user_id = NULL WHERE managed_by_user_id = ?",
+            (user_id,),
+        )
+    db.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    db.commit()
+
+    if invitation_path:
+        try:
+            (UPLOAD_DIR / invitation_path).unlink(missing_ok=True)
+        except OSError:
+            app.logger.warning("Silinen kullanıcıya ait davetiye görseli kaldırılamadı: %s", invitation_path)
+    return jsonify({"message": "Kullanıcı ve bağlı kayıtları kalıcı olarak silindi."})
+
+
 @app.route("/api/management/users/<int:user_id>/readonly")
 @api_manager_required
 def api_management_user_readonly(user_id):
