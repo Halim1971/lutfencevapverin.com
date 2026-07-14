@@ -38,6 +38,11 @@
           <div><strong>{{ item.counts.no_response }}</strong><span>Cevap Yok</span></div>
         </div>
         <a class="secondary" href="{{ url_for('user_readonly', user_id=item.user.id) }}">Kullanıcı Sayfasını Göster</a>
+        {% if super_view %}
+          <form method="post" action="{{ url_for('admin_delete_account', user_id=item.user.id) }}" onsubmit="return confirm('Bu hesap ve bağlı verileri kalıcı olarak silinecek. Bu işlem geri alınamaz. Devam edilsin mi?');">
+            <button class="danger-button" type="submit">Kullanıcıyı Sil</button>
+          </form>
+        {% endif %}
       </article>
     {% else %}
       <article class="card muted">Henüz kullanıcı yok.</article>

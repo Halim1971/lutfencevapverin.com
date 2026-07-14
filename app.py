@@ -1041,12 +1041,19 @@ def api_management_account_access(user_id):
 def api_management_account_delete(user_id):
     if user_id == g.api_user["id"]:
         return jsonify({"error": "Kendi Süper Admin hesabınızı silemezsiniz."}), 400
+    user = delete_managed_account_records(user_id)
+    if not user:
+        return jsonify({"error": "Kullanıcı bulunamadı."}), 404
+    return jsonify({"message": "Kullanıcı ve bağlı kayıtları kalıcı olarak silindi."})
+
+
+def delete_managed_account_records(user_id):
     db = get_db()
     user = db.execute(
         "SELECT * FROM users WHERE id = ? AND role IN ('couple', 'organizer')", (user_id,)
     ).fetchone()
     if not user:
-        return jsonify({"error": "Kullanıcı bulunamadı."}), 404
+        return None
 
     invitation_path = None
     if user["role"] == "couple":
@@ -1071,7 +1078,7 @@ def api_management_account_delete(user_id):
             (UPLOAD_DIR / invitation_path).unlink(missing_ok=True)
         except OSError:
             app.logger.warning("Silinen kullanıcıya ait davetiye görseli kaldırılamadı: %s", invitation_path)
-    return jsonify({"message": "Kullanıcı ve bağlı kayıtları kalıcı olarak silindi."})
+    return user
 
 
 @app.route("/api/management/users/<int:user_id>/readonly")
@@ -1908,6 +1915,17 @@ def admin_customer_access(user_id):
         return redirect(url_for("admin", type="organizers" if user["role"] == "organizer" else "users"))
     get_db().commit()
     flash(message, "success")
+    return redirect(url_for("admin", type="organizers" if user["role"] == "organizer" else "users"))
+
+
+@app.route("/admin/accounts/<int:user_id>/delete", methods=["POST"])
+@login_required("super_admin")
+def admin_delete_account(user_id):
+    user = delete_managed_account_records(user_id)
+    if not user:
+        flash("Kullanıcı bulunamadı.", "error")
+        return redirect(url_for("admin"))
+    flash("Kullanıcı ve bağlı kayıtları kalıcı olarak silindi.", "success")
     return redirect(url_for("admin", type="organizers" if user["role"] == "organizer" else "users"))
 
 

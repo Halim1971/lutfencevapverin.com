@@ -51,6 +51,9 @@
           <input type="hidden" name="action" value="{{ 'access_unblock' if item.user.is_access_blocked else 'access_block' }}">
           <button class="{{ 'primary' if item.user.is_access_blocked else 'danger-button' }}" type="submit">{{ 'Kullanımı Aç' if item.user.is_access_blocked else 'Kullanımı Engelle' }}</button>
         </form>
+        <form method="post" action="{{ url_for('admin_delete_account', user_id=item.user.id) }}" onsubmit="return confirm('Bu hesap ve bağlı verileri kalıcı olarak silinecek. Bu işlem geri alınamaz. Devam edilsin mi?');">
+          <button class="danger-button" type="submit">Kullanıcıyı Sil</button>
+        </form>
         {% if item.user.role == 'organizer' %}
           <a class="secondary" href="{{ url_for('admin_organizer', user_id=item.user.id) }}">Organizatöre Git</a>
         {% else %}
