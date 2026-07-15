@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Hesap Silme Talebi | LCV - Lütfen Cevap Ver{% endblock %}
+{% block body %}
+<main class="app">
+  <section class="card stack">
+    <h1>Hesap Silme Talebi</h1>
+    <p><strong>LCV - Lütfen Cevap Ver</strong></p>
+    <p>Hesabınızı ve uygulamayla ilişkili verilerinizi sildirmek için hesabınızda kullandığınız e-posta adresini aşağıdaki forma yazıp talebinizi gönderin.</p>
+
+    {% if submitted %}
+      <div class="readonly-text" role="status">
+        <strong>Talebiniz alındı.</strong><br>
+        {{ email }} adresi için silme talebi kaydedildi. Hesap sahipliği doğrulandıktan sonra silme işlemi gerçekleştirilecektir.
+      </div>
+    {% else %}
+      <form class="stack" method="post" action="{{ url_for('account_deletion') }}">
+        <label>Hesabınızın e-posta adresi
+          <input name="email" type="email" inputmode="email" autocomplete="email" required maxlength="254">
+        </label>
+        <button class="primary" type="submit">Hesap Silme Talebi Gönder</button>
+      </form>
+    {% endif %}
+  </section>
+
+  <section class="card stack">
+    <h2>Silinecek veriler</h2>
+    <p>Hesap sahipliği doğrulandıktan sonra kullanıcı hesabı, profil bilgileri, etkinlik bilgileri, davetli kayıtları, LCV/RSVP yanıtları, yüklenen davetiye görseli ve uygulamayla ilişkili diğer kullanıcı verileri aktif sistemden kalıcı olarak silinir.</p>
+  </section>
+
+  <section class="card stack">
+    <h2>Saklama bilgisi</h2>
+    <p>Mevcut sistemde yasal, güvenlik veya dolandırıcılık önleme amacıyla ayrı bir kullanıcı verisi arşivi tutulmaz; bu gerekçelerle uygulanan ek bir saklama süresi yoktur.</p>
+    <p>Bu formda girilen e-posta adresi ve talep tarihi, talebin doğrulanması ve silme işleminin tamamlanması için bekleyen talep olarak tutulur. Silme işlemi tamamlandığında bu talep kaydı da kaldırılır.</p>
+  </section>
+</main>
+{% endblock %}

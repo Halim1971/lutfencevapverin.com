@@ -8,6 +8,24 @@
     <p class="muted">Organizatör ve kullanıcı yönetimi</p>
   </section>
 
+  <details class="card stack" {% if deletion_requests %}open{% endif %}>
+    <summary class="primary">Hesap Silme Talepleri ({{ deletion_requests|length }})</summary>
+    <p class="muted">Kimliği doğruladıktan sonra ilgili kullanıcıyı aşağıdaki kullanıcı kartından silin. Silme işlemi tamamlanınca talep kaydını kaldırın.</p>
+    <section class="guest-list">
+      {% for deletion_request in deletion_requests %}
+        <article class="guest-card">
+          <div class="guest-name">{{ deletion_request.email }}</div>
+          <div class="guest-meta">Talep tarihi: {{ deletion_request.requested_at }}</div>
+          <form method="post" action="{{ url_for('admin_complete_account_deletion_request', request_id=deletion_request.id) }}" onsubmit="return confirm('Hesabın ve bağlı verilerin silindiğini doğruladınız mı? Talep kaydı kaldırılacak.');">
+            <button class="secondary" type="submit">Silme Tamamlandı</button>
+          </form>
+        </article>
+      {% else %}
+        <article class="muted">Bekleyen hesap silme talebi yok.</article>
+      {% endfor %}
+    </section>
+  </details>
+
   <section class="mini-row">
     <details class="card stack">
       <summary class="primary">Organizatör Oluştur</summary>

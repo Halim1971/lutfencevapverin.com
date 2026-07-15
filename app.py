@@ -148,6 +148,12 @@ def init_db():
             FOREIGN KEY(guest_id) REFERENCES guests(id),
             FOREIGN KEY(user_id) REFERENCES users(id)
         );
+
+        CREATE TABLE IF NOT EXISTS account_deletion_requests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT NOT NULL UNIQUE,
+            requested_at TEXT NOT NULL
+        );
         """
     )
     ensure_column("users", "full_name", "TEXT")
@@ -1746,10 +1752,37 @@ def respond(token):
     return render_template("respond.html", guest=guest, invitation_url=invitation_url(inv))
 
 
+@app.route("/account-deletion", methods=["GET", "POST"])
+def account_deletion():
+    submitted = False
+    email = ""
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+        if not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
+            flash("Lütfen geçerli bir e-posta adresi girin.", "error")
+        else:
+            db = get_db()
+            db.execute(
+                """
+                INSERT INTO account_deletion_requests (email, requested_at)
+                VALUES (?, ?)
+                ON CONFLICT(email) DO UPDATE SET requested_at = excluded.requested_at
+                """,
+                (email, now_iso()),
+            )
+            db.commit()
+            submitted = True
+    return render_template("account_deletion.html", submitted=submitted, email=email)
+
+
 @app.route("/admin")
 @login_required("super_admin")
 def admin():
-    users = get_db().execute("SELECT * FROM users ORDER BY created_at DESC").fetchall()
+    db = get_db()
+    users = db.execute("SELECT * FROM users ORDER BY created_at DESC").fetchall()
+    deletion_requests = db.execute(
+        "SELECT * FROM account_deletion_requests ORDER BY requested_at DESC, id DESC"
+    ).fetchall()
     active_filter = request.args.get("type", "users")
     cards = []
     for user in users:
@@ -1760,7 +1793,28 @@ def admin():
         if active_filter == "users" and user["role"] != "couple":
             continue
         cards.append({"user": user, "counts": guest_counts(user["id"])})
-    return render_template("admin.html", users=cards, active_filter=active_filter)
+    return render_template(
+        "admin.html",
+        users=cards,
+        active_filter=active_filter,
+        deletion_requests=deletion_requests,
+    )
+
+
+@app.route("/admin/account-deletion-requests/<int:request_id>/complete", methods=["POST"])
+@login_required("super_admin")
+def admin_complete_account_deletion_request(request_id):
+    db = get_db()
+    deletion_request = db.execute(
+        "SELECT * FROM account_deletion_requests WHERE id = ?", (request_id,)
+    ).fetchone()
+    if not deletion_request:
+        flash("Hesap silme talebi bulunamadı.", "error")
+        return redirect(url_for("admin"))
+    db.execute("DELETE FROM account_deletion_requests WHERE id = ?", (request_id,))
+    db.commit()
+    flash("Tamamlanan hesap silme talebi kayıtlardan kaldırıldı.", "success")
+    return redirect(url_for("admin"))
 
 
 @app.route("/admin/accounts/create", methods=["POST"])
