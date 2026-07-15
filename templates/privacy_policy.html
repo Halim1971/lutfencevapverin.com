@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Gizlilik Politikası | LCV - Lütfen Cevap Ver{% endblock %}
+{% block body %}
+<main class="app">
+  <section class="card stack">
+    <h1>Gizlilik Politikası</h1>
+    <p><strong>LCV - Lütfen Cevap Ver</strong></p>
+    <p>Bu politika, LCV - Lütfen Cevap Ver Android uygulaması ile lutfencevapverin.com üzerindeki uygulama servislerinin kişisel verileri nasıl işlediğini açıklar.</p>
+    <p class="muted">Yürürlük tarihi: 16 Temmuz 2026</p>
+  </section>
+
+  <section class="card stack">
+    <h2>Toplanan veriler</h2>
+    <p>Uygulamanın kullanılan özelliklerine bağlı olarak aşağıdaki bilgiler işlenir:</p>
+    <ul>
+      <li>Kullanıcı adı ve soyadı ile e-posta adresi,</li>
+      <li>Davetlilerin adları ve telefon numaraları,</li>
+      <li>Davetli listesi, katılım durumu ve LCV/RSVP cevapları,</li>
+      <li>Davet gönderim ve cevap zamanları ile hatırlatma ayarları,</li>
+      <li>Kullanıcının isteğe bağlı olarak yüklediği davetiye görseli ve yazdığı davet mesajı,</li>
+      <li>Kullanıcının içe aktarmayı seçtiği XLSX veya JSON dosyasındaki davetli adı ve telefon bilgileri,</li>
+      <li>Yalnızca kullanıcı rehber erişimine izin verip kişileri seçtiğinde, seçilen kişilerin adları ve telefon numaraları.</li>
+    </ul>
+    <p>Uygulama rehberin tamamını sunucuya yüklemez; yalnızca kullanıcının seçtiği kişiler aktarılır. İçe aktarılan XLSX/JSON dosyasının kendisi kalıcı bir dosya olarak saklanmaz; içindeki uygun davetli bilgileri okunarak davetli listesine kaydedilir.</p>
+    <p>Web ve API erişimlerinde sunucunun standart erişim ve hata kayıtları; IP adresi, istek tarihi, istenen yol, yanıt durumu ve kullanıcı aracısı gibi teknik bilgileri güvenlik, hata inceleme ve hizmetin işletilmesi amacıyla kaydedebilir.</p>
+  </section>
+
+  <section class="card stack">
+    <h2>Verileri kullanma amaçları</h2>
+    <p>Bu veriler hesap oluşturma ve giriş işlemleri, kullanıcı yetkilendirmesi, davetli listesi yönetimi, kişisel LCV bağlantılarının hazırlanması, davetlerin gönderilmesi, RSVP cevaplarının alınması, katılım sonuçlarının gösterilmesi, veri içe/dışa aktarma işlemleri, hesap silme taleplerinin yürütülmesi ve hizmet güvenliğinin sağlanması için kullanılır.</p>
+  </section>
+
+  <section class="card stack">
+    <h2>Saklama ve güvenlik</h2>
+    <p>Hesap, profil, davetli, RSVP ve uygulama ayarı bilgileri production sunucusundaki SQLite veritabanında tutulur. Yüklenen davetiye görselleri sunucunun uygulamaya ait dosya alanında saklanır. Android uygulamasındaki oturum anahtarı cihazın şifreli güvenli depolama alanında tutulur.</p>
+    <p>Giriş doğrulamasında parolaların güvenli parola özetleri (hash) kullanılır. Yönetici veya organizatör tarafından oluşturulan hesapların sistem tarafından üretilen geçici erişim şifresi, yetkili yönetici/organizatörün kullanıcıya iletebilmesi ve yönetim ekranında görebilmesi için ayrıca okunabilir bir yönetim alanında tutulur. Kullanıcının kendi belirlediği diğer giriş parolaları bu alanda saklanmaz.</p>
+    <p>Android uygulaması ile production backend arasındaki veri iletişimi HTTPS üzerinden gerçekleştirilir.</p>
+    <p>Veriler, hizmetin kullanılması ve ilgili hesabın yönetilmesi için tutulur. Mevcut sistemde yasal, güvenlik veya dolandırıcılık önleme amacıyla ayrı bir kullanıcı verisi arşivi ya da bu amaçlarla tanımlanmış ek bir saklama süresi bulunmaz.</p>
+  </section>
+
+  <section class="card stack">
+    <h2>Paylaşım ve üçüncü taraf hizmetleri</h2>
+    <p>Kullanıcı verileri satılmaz ve reklam şirketleriyle paylaşılmaz. Uygulamada reklam, analitik veya mobil çökme raporlama hizmeti kullanılmaz.</p>
+    <p>Kullanıcı “WhatsApp’ı Aç” veya paylaşım işlevini kendisi seçtiğinde telefon numarası, davet mesajı, kişisel LCV bağlantısı ya da dışa aktarılan dosya kullanıcının yönlendirmesiyle WhatsApp veya seçtiği başka bir uygulamaya aktarılabilir. Bu aktarım otomatik değildir ve ilgili üçüncü tarafın kendi gizlilik koşullarına tabidir.</p>
+    <p>Web sayfalarının yazı tipini göstermek için Google Fonts kullanılabilir. Bu durumda kullanıcının tarayıcısı yazı tipi dosyalarını Google sunucularından ister ve standart bağlantı bilgileri Google’a iletilebilir. Android uygulamasındaki yazı tipi uygulama paketinin içinde yerel olarak bulunur.</p>
+  </section>
+
+  <section class="card stack">
+    <h2>Hesap ve veri silme</h2>
+    <p>Kullanıcılar, hesaplarında kullandıkları e-posta adresini girerek herkese açık hesap silme sayfasından talep gönderebilir. Hesap sahipliği doğrulandıktan sonra kullanıcı hesabı, profil bilgileri, etkinlik bilgileri, davetli kayıtları, RSVP cevapları, yüklenen davetiye görseli ve uygulamayla ilişkili diğer kullanıcı verileri aktif sistemden kalıcı olarak silinir.</p>
+    <a class="primary" href="{{ url_for('account_deletion') }}">Hesap Silme Sayfasına Git</a>
+    <p><a href="https://lutfencevapverin.com/account-deletion">https://lutfencevapverin.com/account-deletion</a></p>
+  </section>
+
+  <section class="card stack">
+    <h2>İletişim</h2>
+    <p>Gizlilik ve kişisel verilerle ilgili sorularınız için:</p>
+    <p><a href="mailto:admin@lutfencevapverin.com">admin@lutfencevapverin.com</a></p>
+  </section>
+</main>
+{% endblock %}

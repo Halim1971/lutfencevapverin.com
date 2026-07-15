@@ -1775,6 +1775,11 @@ def account_deletion():
     return render_template("account_deletion.html", submitted=submitted, email=email)
 
 
+@app.route("/privacy-policy")
+def privacy_policy():
+    return render_template("privacy_policy.html")
+
+
 @app.route("/admin")
 @login_required("super_admin")
 def admin():
