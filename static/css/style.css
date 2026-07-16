@@ -31,6 +31,7 @@ h1, h2, h3, p { margin-top: 0; }
 .auth-title { display: grid; gap: 0; color: var(--dark); text-align: center; line-height: 1; margin: 8px 0 2px; }
 .auth-title strong { font-size: clamp(56px, 17vw, 88px); font-weight: 900; letter-spacing: 0; }
 .auth-title span { font-size: clamp(38px, 11vw, 58px); font-weight: 900; }
+.login-contact-email { width: calc(100% - 8px); margin: 16px 4px 0; color: var(--muted); font-size: 24px; font-weight: 400; line-height: 1.2; letter-spacing: clamp(1px, .45vw, 5px); text-align: center; white-space: nowrap; }
 .topbar { display: grid; gap: 10px; }
 .topbar-row { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
 .topbar-row form { margin: 0; }
