@@ -164,6 +164,7 @@ def init_db():
     ensure_column("users", "beta_login_password", "TEXT")
     ensure_column("users", "login_password", "TEXT")
     ensure_column("users", "managed_by_user_id", "INTEGER")
+    ensure_column("users", "organization_company_name", "TEXT")
     ensure_column("settings", "invitation_message", "TEXT")
     ensure_column("guests", "is_direct_participant", "INTEGER NOT NULL DEFAULT 0")
     db.commit()
@@ -390,9 +391,13 @@ def login_required(role=None):
                 session.clear()
                 flash("Beta kullanıcı erişiminiz durdurulmuştur.", "error")
                 return redirect(url_for("login"))
+            profile_missing = (
+                user["role"] == "couple" and not user["full_name"]
+            ) or (
+                user["role"] == "organizer" and not user["organization_company_name"]
+            )
             if (
-                user["role"] == "couple"
-                and not user["full_name"]
+                profile_missing
                 and request.endpoint != "complete_profile"
                 and request.endpoint != "logout"
                 and not request.endpoint.startswith("static")
@@ -1219,6 +1224,8 @@ def login():
             if user["role"] == "super_admin":
                 return redirect(url_for("admin"))
             if user["role"] == "organizer":
+                if not user["organization_company_name"]:
+                    return redirect(url_for("complete_profile"))
                 return redirect(url_for("organizer_dashboard"))
             if not user["full_name"]:
                 return redirect(url_for("complete_profile"))
@@ -1236,13 +1243,16 @@ def complete_profile():
     if request.method == "POST":
         full_name = " ".join(request.form.get("full_name", "").split())
         if len(full_name) < 3:
-            flash("Lütfen isim soyisim girin.", "error")
-            return render_template("complete_profile.html")
-        get_db().execute("UPDATE users SET full_name = ? WHERE id = ?", (full_name, user["id"]))
+            flash("Lütfen organizasyon şirketi adını girin." if user["role"] == "organizer" else "Lütfen isim soyisim girin.", "error")
+            return render_template("complete_profile.html", user=user)
+        if user["role"] == "organizer":
+            get_db().execute("UPDATE users SET organization_company_name = ? WHERE id = ?", (full_name, user["id"]))
+        else:
+            get_db().execute("UPDATE users SET full_name = ? WHERE id = ?", (full_name, user["id"]))
         get_db().commit()
         flash("Bilgileriniz kaydedildi.", "success")
-        return redirect(url_for("home"))
-    return render_template("complete_profile.html")
+        return redirect(url_for("organizer_dashboard" if user["role"] == "organizer" else "home"))
+    return render_template("complete_profile.html", user=user)
 
 
 @app.route("/logout", methods=["POST"])

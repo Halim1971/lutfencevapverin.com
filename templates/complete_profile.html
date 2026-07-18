@@ -7,12 +7,12 @@
       <span>lutfencevapverin.com</span>
     </div>
     <div>
-      <h1>İsim Soyisim</h1>
+      <h1>{{ 'Organizasyon Şirketi Adı' if user.role == 'organizer' else 'İsim Soyisim' }}</h1>
       <p class="muted">Bu bilgi sadece bir kez istenir ve hesabınızda saklanır.</p>
     </div>
     <form class="stack" method="post">
-      <label>İsim Soyisim
-        <input name="full_name" autocomplete="name" required>
+      <label>{{ 'Organizasyon Şirketi Adı' if user.role == 'organizer' else 'İsim Soyisim' }}
+        <input name="full_name" autocomplete="organization" required>
       </label>
       <button class="primary" type="submit">Devam Et</button>
     </form>

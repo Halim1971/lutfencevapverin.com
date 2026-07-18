@@ -4,7 +4,7 @@
 <main class="app">
   {% include "_topbar.html" with context %}
   <section class="card">
-    <h1>Admin</h1>
+    <h1>{{ organizer.organization_company_name or organizer.email }}</h1>
     <p class="muted">{{ organizer.email }}</p>
   </section>
 
