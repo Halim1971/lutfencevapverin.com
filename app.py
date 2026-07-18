@@ -277,6 +277,7 @@ def user_payload(user):
         "id": user["id"],
         "email": user["email"],
         "full_name": user["full_name"],
+        "organization_company_name": user["organization_company_name"],
         "role": user["role"],
         "created_at": user["created_at"],
         "is_beta_user": bool(user["is_beta_user"]),
@@ -664,8 +665,12 @@ def api_me():
     if request.method == "POST":
         full_name = " ".join(str((request.get_json(silent=True) or {}).get("full_name", "")).split())
         if len(full_name) < 3:
-            return jsonify({"error": "Lütfen isim soyisim girin."}), 400
-        get_db().execute("UPDATE users SET full_name = ? WHERE id = ?", (full_name, g.api_user["id"]))
+            message = "Lütfen organizasyon şirketi adını girin." if g.api_user["role"] == "organizer" else "Lütfen isim soyisim girin."
+            return jsonify({"error": message}), 400
+        if g.api_user["role"] == "organizer":
+            get_db().execute("UPDATE users SET organization_company_name = ? WHERE id = ?", (full_name, g.api_user["id"]))
+        else:
+            get_db().execute("UPDATE users SET full_name = ? WHERE id = ?", (full_name, g.api_user["id"]))
         get_db().commit()
         g.api_user = get_db().execute("SELECT * FROM users WHERE id = ?", (g.api_user["id"],)).fetchone()
     return jsonify({"user": user_payload(g.api_user)})
