@@ -4,7 +4,7 @@
   {% include "_topbar.html" with context %}
   <section class="card">
     <h1>LCV Yönetimi</h1>
-    <p class="muted">Kim geliyor, kim gelemiyor, kim cevap vermedi. Tek ekrandan takip edin.</p>
+    <p class="home-user-name">{{ user.full_name }}</p>
   </section>
   <section class="summary">
     <a class="summary-item{% if counts.total == 0 %} inactive{% endif %}" href="{% if counts.total > 0 %}{{ url_for('guests') }}{% else %}#{% endif %}">

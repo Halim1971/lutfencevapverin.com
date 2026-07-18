@@ -39,6 +39,7 @@ h1, h2, h3, p { margin-top: 0; }
 .topbar-row .ghost { width: auto; min-width: 92px; }
 .card { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 18px; box-shadow: 0 16px 40px rgba(15,63,63,.08); min-width: 0; }
 .card h1 { color: var(--dark); font-size: 30px; line-height: 1.1; margin-bottom: 8px; }
+.home-user-name { margin: 0; color: var(--dark); font-size: 26px; font-weight: 700; line-height: 1.2; }
 .card h2 { color: var(--dark); font-size: 24px; margin-bottom: 10px; }
 .muted { color: var(--muted); }
 .stack { display: grid; gap: 12px; }
